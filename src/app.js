@@ -2,14 +2,14 @@ import express from "express";
 import axios from "axios";
 import cors from "cors"
 import qs from "qs";
-import bodyParser from "body-parser"
+import fernet from "fernet";
 
 const app = express();
 app.use(cors());
 app.options('*', cors());
 
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
 
 const portApp = 3000;
 const urlApp = 'localhost'
@@ -17,6 +17,21 @@ const protocolApp = 'http'
 const baseUrlApp = `${protocolApp}://${urlApp}:${portApp}`
 const baseUrl = 'https://map.bpkp.go.id';
 
+app.get('/get_bearer_token', async (req, res) => {
+
+    var secret = new fernet.Secret("YXKuFIV17g0Pcv2FqDvQ4HfC-2-iWO_ZxxxvViVMo44=");
+
+
+    var token = new fernet.Token({
+        secret: secret,
+        time: Date.parse(1),
+        iv: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    })
+
+    token.encode("rQ5Y3nNdnnrL7JUTY7ePO2uj9z4s8I2onL4eql6H5rUcVhNFvGuAIaLRFsEYVx1I")
+    res.send(token.token)
+
+});
 
 app.get('/api/:dataPath', async (req, res) => {
 
