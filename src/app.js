@@ -3,6 +3,7 @@ import axios from "axios";
 import cors from "cors"
 import qs from "qs";
 import fernet from "fernet";
+import 'dotenv/config'
 
 const app = express();
 app.use(cors());
@@ -11,7 +12,7 @@ app.options('*', cors());
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
-const portApp = 3000;
+const portApp = process.env.PORT;
 const urlApp = 'localhost'
 const protocolApp = 'http'
 const baseUrlApp = `${protocolApp}://${urlApp}:${portApp}`
