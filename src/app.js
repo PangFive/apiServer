@@ -19,17 +19,28 @@ const baseUrl = 'https://map.bpkp.go.id';
 
 app.get('/get_bearer_token', async (req, res) => {
 
-    var secret = new fernet.Secret("YXKuFIV17g0Pcv2FqDvQ4HfC-2-iWO_ZxxxvViVMo44=");
+    try {
 
+        var secret = new fernet.Secret("YXKuFIV17g0Pcv2FqDvQ4HfC-2-iWO_ZxxxvViVMo44=");
 
-    var token = new fernet.Token({
-        secret: secret,
-        time: Date.parse(1),
-        iv: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-    })
+        var token = new fernet.Token({
+            secret: secret,
+            time: Date.parse(1),
+            iv: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        })
 
-    token.encode("rQ5Y3nNdnnrL7JUTY7ePO2uj9z4s8I2onL4eql6H5rUcVhNFvGuAIaLRFsEYVx1I")
-    res.send(token.token)
+        token.encode("rQ5Y3nNdnnrL7JUTY7ePO2uj9z4s8I2onL4eql6H5rUcVhNFvGuAIaLRFsEYVx1I")
+        res.send(token.token)
+
+    } catch (err) {
+
+        res.json({
+            status: 'error',
+            message: err.message,
+            data: err?.data
+        });
+
+    }
 
 });
 
@@ -51,13 +62,25 @@ app.get('/api/:dataPath', async (req, res) => {
     if (req.headers["content-type"] != undefined) {
         config.headers['Content-Type'] = req.headers["content-type"]
     }
+
+    try {
+
+        await axios.get(url,config).then((response)=>{
     
-    axios.get(url,config).then((response)=>{
+            res.statusCode = response.status;
+    
+            res.json(response.data);
+        })
 
-        res.statusCode = response.status;
+    } catch (err) {
 
-        res.json(response.data);
-    })
+        res.json({
+            status: 'error',
+            message: err.message,
+            data: err?.data
+        });
+
+    }
 
 });
 
@@ -81,12 +104,25 @@ app.post('/api/:dataPath', async (req, res) => {
         config.headers['Content-Type'] = req.headers["content-type"]
     }
     
-    axios.post(url,req.body ,config).then((response)=>{
+    
+    try {
+        
+        await axios.post(url,req.body ,config).then((response)=>{
+    
+            res.statusCode = response.status;
+    
+            res.json(response.data);
+        })
 
-        res.statusCode = response.status;
+    } catch (err) {
 
-        res.json(response.data);
-    })
+        res.json({
+            status: 'error',
+            message: err.message,
+            data: err?.data
+        });
+
+    }
 
 });
 
