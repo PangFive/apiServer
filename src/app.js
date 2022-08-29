@@ -62,6 +62,14 @@ app.get('/api/:dataPath', async (req, res) => {
     if (req.headers["content-type"] != undefined) {
         config.headers['Content-Type'] = req.headers["content-type"]
     }
+    
+    if (req.headers["authorization"] != undefined) {
+        config.headers['Authorization'] = req.headers["authorization"]
+    }
+    
+    if (req.headers["x-client-id"] != undefined) {
+        config.headers['x-client-id'] = req.headers["x-client-id"]
+    }
 
     try {
 
@@ -104,13 +112,20 @@ app.post('/api/:dataPath', async (req, res) => {
         config.headers['Content-Type'] = req.headers["content-type"]
     }
     
+    if (req.headers["authorization"] != undefined) {
+        config.headers['Authorization'] = req.headers["authorization"]
+    }
+    
+    if (req.headers["x-client-id"] != undefined) {
+        config.headers['x-client-id'] = req.headers["x-client-id"]
+    }
     
     try {
         
-        await axios.post(url,req.body ,config).then((response)=>{
+        await axios.post(url, req.body ,config).then((response)=>{
     
             res.statusCode = response.status;
-    
+            console.log(response)
             res.json(response.data);
         })
 
