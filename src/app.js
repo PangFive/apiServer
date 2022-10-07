@@ -82,7 +82,7 @@ app.get('/api/:dataPath', async (req, res) => {
         })
 
     } catch (err) {
-
+        res.statusCode = err.response.status;
         res.json({
             status: 'error',
             message: err.message,
@@ -131,7 +131,7 @@ app.post('/api/:dataPath', async (req, res) => {
         })
 
     } catch (err) {
-
+        res.statusCode = err.response.status;
         res.json({
             status: 'error',
             message: err.message,
