@@ -126,7 +126,6 @@ app.post('/api/:dataPath', async (req, res) => {
         await axios.post(url, req.body ,config).then((response)=>{
     
             res.statusCode = response.status;
-            console.log(response)
             res.json(response.data);
         })
 
