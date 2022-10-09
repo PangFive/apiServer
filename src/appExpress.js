@@ -1,18 +1,16 @@
-import Fastify from 'fastify';
+import express from "express";
 import axios from "axios";
+import cors from "cors"
 import qs from "qs";
 import fernet from "fernet";
-import 'dotenv/config';
-import cors from '@fastify/cors';
+import 'dotenv/config'
 
-const fastify = Fastify({
-    logger: false
-})
+const app = express();
+app.use(cors());
+app.options('*', cors());
 
-await fastify.register(cors, { 
-    origin: '*'
-})
-
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
 
 const portApp = process.env.PORT;
 const urlApp = 'localhost'
@@ -20,14 +18,34 @@ const protocolApp = 'http'
 const baseUrlApp = `${protocolApp}://${urlApp}:${portApp}`
 const baseUrl = 'https://map.bpkp.go.id';
 
-// root
-fastify.get('/', function (req, res) {
-    console.log(portApp)
-    res.send({ hello: 'world' })
-})
+app.get('/get_bearer_token', async (req, res) => {
 
-// get api
-fastify.get('/api/:dataPath', async function (req, res) {
+    try {
+
+        var secret = new fernet.Secret("YXKuFIV17g0Pcv2FqDvQ4HfC-2-iWO_ZxxxvViVMo44=");
+
+        var token = new fernet.Token({
+            secret: secret,
+            time: Date.parse(1),
+            iv: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        })
+
+        token.encode("rQ5Y3nNdnnrL7JUTY7ePO2uj9z4s8I2onL4eql6H5rUcVhNFvGuAIaLRFsEYVx1I")
+        res.send(token.token)
+
+    } catch (err) {
+
+        res.json({
+            status: 'error',
+            message: err.message,
+            data: err?.data
+        });
+
+    }
+
+});
+
+app.get('/api/:dataPath', async (req, res) => {
 
     let path = '/'+ req.params.dataPath;
     let params = '?' + qs.stringify(req.query);
@@ -59,22 +77,23 @@ fastify.get('/api/:dataPath', async function (req, res) {
         await axios.get(url,config).then((response)=>{
     
             res.statusCode = response.status;
-            let data = response.data;
-            res.send({...data});
+    
+            res.json(response.data);
         })
 
     } catch (err) {
         res.statusCode = err.response.status;
-        res.send({
+        res.json({
             status: 'error',
             message: err.message,
             data: err?.data
         });
 
     }
-})
 
-fastify.post('/api/:dataPath', async (req, res) => {
+});
+
+app.post('/api/:dataPath', async (req, res) => {
 
     let path = '/'+ req.params.dataPath;
     let params = '?' + qs.stringify(req.query);
@@ -107,13 +126,12 @@ fastify.post('/api/:dataPath', async (req, res) => {
         await axios.post(url, req.body ,config).then((response)=>{
     
             res.statusCode = response.status;
-            let data = response.data;
-            res.send({...data});
+            res.json(response.data);
         })
 
     } catch (err) {
         res.statusCode = err.response.status;
-        res.send({
+        res.json({
             status: 'error',
             message: err.message,
             data: err?.data
@@ -123,36 +141,6 @@ fastify.post('/api/:dataPath', async (req, res) => {
 
 });
 
-// Get Bearer Token
-fastify.get('/get_bearer_token', function (req, res) {
-    try {
-
-        var secret = new fernet.Secret("YXKuFIV17g0Pcv2FqDvQ4HfC-2-iWO_ZxxxvViVMo44=");
-
-        var token = new fernet.Token({
-            secret: secret,
-            time: Date.parse(1),
-            iv: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-        })
-
-        token.encode("rQ5Y3nNdnnrL7JUTY7ePO2uj9z4s8I2onL4eql6H5rUcVhNFvGuAIaLRFsEYVx1I")
-        res.send(token.token)
-
-    } catch (err) {
-
-        res.json({
-            status: 'error',
-            message: err.message,
-            data: err?.data
-        });
-
-    }
-})
-
-// Run the server!
-fastify.listen({ port: portApp }, function (err, address) {
-    if (err) {
-        fastify.log.error(err)
-        process.exit(1)
-    }
+app.listen(portApp, () => {
+    console.log('jalan port ' + portApp);
 })
