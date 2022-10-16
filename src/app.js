@@ -140,7 +140,7 @@ fastify.get('/get_bearer_token', function (req, res) {
 
     } catch (err) {
 
-        res.json({
+        res.send({
             status: 'error',
             message: err.message,
             data: err?.data
