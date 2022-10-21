@@ -4,6 +4,7 @@ import qs from "qs";
 import fernet from "fernet";
 import 'dotenv/config';
 import cors from '@fastify/cors';
+import {promises as fs} from 'fs';
 
 const fastify = Fastify({
     logger: false
@@ -24,6 +25,85 @@ const baseUrl = 'https://map.bpkp.go.id';
 fastify.get('/', function (req, res) {
     console.log(portApp)
     res.send({ hello: 'world' })
+})
+
+fastify.get('/talenta/:api_token', async function (req, res) {
+    
+    const api_token = req.params.api_token;
+
+
+    let url_get_pegawai = "https://map.bpkp.go.id/api/v2/pegawaiSingkat?api_token=" + api_token;
+
+    let config = {
+        headers : {
+            'Host' : 'map.bpkp.go.id',
+            'User-Agent' : 'okhttp/3.14.9',
+        }
+    }
+
+    let data_pegawai 
+
+    await fs.readFile("./src/pegawaiSingkat.json", "utf8", (err, jsonString) => {
+        if (err) {
+          console.log("Error reading file from disk:", err);
+          return;
+        }
+        try {
+            return jsonString;
+        } catch (err) {
+          console.log("Error parsing JSON string:", err);
+        }
+    }).then(data => (data_pegawai = JSON.parse(data)))
+
+ 
+    // await axios.get(url_get_pegawai,config).then((response)=>{
+    
+    //     // res.statusCode = response.status;
+    //     data_pegawai = response.data;
+    // })
+
+    let result = [];
+
+    for (let [index, pegawai] of data_pegawai.result.entries()){
+
+        let url_talenta = "https://map.bpkp.go.id/api/v1/talent/profile/" + pegawai.niplama + "?api_token=" + api_token;
+        try {
+            await axios.get(url_talenta, config).then((response) => {
+    
+                if (response.status == 200) {
+                    result.push(response.data.result);
+                };
+                // console.log(`berhasil ${index}`)
+            });
+
+        } catch (err) {
+            // console.log(`gagal ${index}`)
+        }
+
+    }
+
+    res.send({ result })
+
+})
+
+fastify.get('/talentaResult', async function (req, res) {
+
+    let result 
+
+    await fs.readFile("./src/dataTalenta.json", "utf8", (err, jsonString) => {
+        if (err) {
+          console.log("Error reading file from disk:", err);
+          return;
+        }
+        try {
+            return jsonString;
+        } catch (err) {
+          console.log("Error parsing JSON string:", err);
+        }
+    }).then(data => (result = JSON.parse(data)))
+
+    res.send({ ...result })
+
 })
 
 // get api
