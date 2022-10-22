@@ -89,6 +89,8 @@ fastify.get('/talenta/:api_token', async function (req, res) {
 fastify.get('/talentaResult', async function (req, res) {
 
     let result 
+    const searchTerm = `${req.query.kantor}`;
+    const searchNama = `${req.query.nama}`;
 
     await fs.readFile("./src/dataTalenta.json", "utf8", (err, jsonString) => {
         if (err) {
@@ -100,9 +102,33 @@ fastify.get('/talentaResult', async function (req, res) {
         } catch (err) {
           console.log("Error parsing JSON string:", err);
         }
-    }).then(data => (result = JSON.parse(data)))
+    }).then(data => (result = JSON.parse(data).result))
+    
+    if (searchTerm !== "undefined" && searchTerm.length > 0) {
+        result = result.filter(item => {
+           
+           var lineStr = `${item.nama_unit}`;
+           if(lineStr.toLowerCase().indexOf(searchTerm.toLowerCase()) == -1){
+               return false
+           }else{
+               return true
+           }
+        })
+    }
 
-    res.send({ ...result })
+    if (searchNama !== "undefined" && searchNama.length > 0) {
+        result = result.filter(item => {
+           
+           var lineStr = `${item.nama}`;
+           if(lineStr.toLowerCase().indexOf(searchNama.toLowerCase()) == -1){
+               return false
+           }else{
+               return true
+           }
+        })
+    }
+
+    res.send({ result })
 
 })
 
