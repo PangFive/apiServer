@@ -23,6 +23,11 @@ const baseUrl = 'https://map.bpkp.go.id';
 
 // root
 fastify.get('/', function (req, res) {
+    console.log(req.headers)
+    res.send({ hello: 'world' })
+})
+
+fastify.post('/', function (req, res) {
     console.log(portApp)
     res.send({ hello: 'world' })
 })
