@@ -78,16 +78,52 @@ fastify.get('/talenta/:api_token', async function (req, res) {
                 if (response.status == 200) {
                     result.push(response.data.result);
                 };
-                // console.log(`berhasil ${index}`)
+                console.log(`berhasil ${index}`)
             });
 
         } catch (err) {
-            // console.log(`gagal ${index}`)
+            console.log(`gagal ${index} - ${pegawai.nama}`)
         }
 
     }
 
-    res.send({ result })
+    await fs.writeFile(`./src/data/dataTalenta_${Date.now()}.json`, JSON.stringify(result), 'utf8', ()=>console.log('Berhasil menyimpan data'));
+
+    res.send( result )
+
+})
+
+fastify.get('/pegawai/:api_token', async function (req, res) {
+    
+    const api_token = req.params.api_token;
+
+
+    let url_get_pegawai = "https://map.bpkp.go.id/api/v2/pegawaiSingkat?api_token=" + api_token;
+
+    let config = {
+        headers : {
+            'Host' : 'map.bpkp.go.id',
+            'User-Agent' : 'okhttp/3.14.9',
+        }
+    }
+
+    let data_pegawai 
+
+    try {
+        await axios.get(url_get_pegawai, config).then((response) => {
+
+            if (response.status == 200) {
+                data_pegawai = response.data;
+            };
+        });
+
+        await fs.writeFile(`./src/data/dataPegawai_${Date.now()}.json`, JSON.stringify(data_pegawai), 'utf8', ()=>console.log('berhasil'));
+
+    } catch (err) {
+        console.log(err)
+    }
+
+    res.send({ ...data_pegawai })
 
 })
 
@@ -107,7 +143,7 @@ fastify.get('/talentaResult', async function (req, res) {
         } catch (err) {
           console.log("Error parsing JSON string:", err);
         }
-    }).then(data => (result = JSON.parse(data).result))
+    }).then(data => (result = JSON.parse(data)))
     
     if (searchTerm !== "undefined" && searchTerm.length > 0) {
         result = result.filter(item => {
@@ -133,7 +169,7 @@ fastify.get('/talentaResult', async function (req, res) {
         })
     }
 
-    res.send({ result })
+    res.send( result )
 
 })
 
